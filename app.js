@@ -1,5 +1,6 @@
 const express = require('express');
-const pool = require('./db');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 const app = express();
 app.use(express.json()); // Para permitir JSON no corpo das requisições
@@ -8,23 +9,24 @@ app.use(express.json()); // Para permitir JSON no corpo das requisições
 app.post('/livros', async (req, res) => {
   try {
     const { titulo, autor, ano_publicacao, isbn } = req.body;
-    const novoLivro = await pool.query(
-      'INSERT INTO livros (titulo, autor, ano_publicacao, isbn) VALUES ($1, $2, $3, $4) RETURNING *',
-      [titulo, autor, ano_publicacao, isbn]
-    );
-    res.json(novoLivro.rows[0]);
+    const novoLivro = await prisma.livro.create({
+      data: { titulo, autor, ano_publicacao, isbn },
+    });
+    res.json(novoLivro);
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: 'Erro ao criar livro.' });
   }
 });
 
 // 2. READ (GET) - Todos os livros
 app.get('/livros', async (req, res) => {
   try {
-    const todosLivros = await pool.query('SELECT * FROM livros');
-    res.json(todosLivros.rows);
+    const todosLivros = await prisma.livro.findMany();
+    res.json(todosLivros);
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: 'Erro ao buscar livros.' });
   }
 });
 
@@ -32,10 +34,13 @@ app.get('/livros', async (req, res) => {
 app.get('/livros/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const livro = await pool.query('SELECT * FROM livros WHERE id = $1', [id]);
-    res.json(livro.rows[0]);
+    const livro = await prisma.livro.findUnique({
+      where: { id: parseInt(id) },
+    });
+    res.json(livro);
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: 'Erro ao buscar livro.' });
   }
 });
 
@@ -44,13 +49,14 @@ app.put('/livros/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { titulo, autor, ano_publicacao, isbn } = req.body;
-    await pool.query(
-      'UPDATE livros SET titulo = $1, autor = $2, ano_publicacao = $3, isbn = $4 WHERE id = $5',
-      [titulo, autor, ano_publicacao, isbn, id]
-    );
-    res.json('Livro atualizado com sucesso!');
+    const livroAtualizado = await prisma.livro.update({
+      where: { id: parseInt(id) },
+      data: { titulo, autor, ano_publicacao, isbn },
+    });
+    res.json(livroAtualizado);
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: 'Erro ao atualizar livro.' });
   }
 });
 
@@ -58,10 +64,13 @@ app.put('/livros/:id', async (req, res) => {
 app.delete('/livros/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query('DELETE FROM livros WHERE id = $1', [id]);
-    res.json('Livro deletado com sucesso!');
+    await prisma.livro.delete({
+      where: { id: parseInt(id) },
+    });
+    res.json({ message: 'Livro deletado com sucesso!' });
   } catch (err) {
     console.error(err.message);
+    res.status(500).json({ error: 'Erro ao deletar livro.' });
   }
 });
 
@@ -69,4 +78,9 @@ app.delete('/livros/:id', async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+});
+
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit(0);
 });

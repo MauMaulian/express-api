@@ -17,6 +17,6 @@ model livro {
   id             Int    @id @default(autoincrement())
   titulo         String
   autor          String
-  ano_publicacao Int
+  anoPublicacao  Int
   isbn           String @unique
 }

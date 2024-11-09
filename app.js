@@ -8,9 +8,9 @@ app.use(express.json()); // Para permitir JSON no corpo das requisições
 // 1. CREATE (POST)
 app.post('/livros', async (req, res) => {
   try {
-    const { titulo, autor, ano_publicacao, isbn } = req.body;
+    const { titulo, autor, anoPublicacao, isbn } = req.body;
     const novoLivro = await prisma.livro.create({
-      data: { titulo, autor, ano_publicacao, isbn },
+      data: { titulo, autor, anoPublicacao, isbn },
     });
     res.json(novoLivro);
   } catch (err) {
@@ -48,10 +48,10 @@ app.get('/livros/:id', async (req, res) => {
 app.put('/livros/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { titulo, autor, ano_publicacao, isbn } = req.body;
+    const { titulo, autor, anoPublicacao, isbn } = req.body;
     const livroAtualizado = await prisma.livro.update({
       where: { id: parseInt(id) },
-      data: { titulo, autor, ano_publicacao, isbn },
+      data: { titulo, autor, anoPublicacao, isbn },
     });
     res.json(livroAtualizado);
   } catch (err) {

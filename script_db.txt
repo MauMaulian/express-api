@@ -1,9 +1,0 @@
-CREATE DATABASE biblioteca;
-
-CREATE TABLE livros (
-  id SERIAL PRIMARY KEY,
-  titulo VARCHAR(100),
-  autor VARCHAR(100),
-  ano_publicacao INT,
-  isbn VARCHAR(20)
-);

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+    express-db:
+        container_name: express-db
+        image: postgres:12-alpine
+        restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_DB: express-db
+            POSTGRES_USER: express-db
+            POSTGRES_PASSWORD: 123456
+
+    express-app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "5000:5000"
+        depends_on:
+            - express-db

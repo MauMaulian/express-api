@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 5000
 
 # Comando para rodar as migrações Prisma e depois iniciar o servidor
-CMD npx prisma migrate dev --name init && npm start
+CMD npx prisma migrate deploy && npm start

@@ -19,5 +19,5 @@ model livro {
   titulo         String
   autor          String
   anoPublicacao  Int
-  isbn           String @unique
+  isbn           String
 }
